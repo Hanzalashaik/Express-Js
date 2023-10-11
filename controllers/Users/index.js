@@ -4,12 +4,11 @@ import userModel from "../../models/users/Users.js";
 const router = express.Router();
 
 //post data
-
-router.post("/addusers", async (req, res) => {
+router.post("/addUsers", async (req, res) => {
   try {
     let userData = req.body;
     await userModel.create(userData);
-    res.status(200).json({ msg: "User Added Successfully" });
+    res.status(200).json({ msg: "User added sucessfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -26,68 +25,61 @@ router.get("/getUsers", async (req, res) => {
   }
 });
 
-//put data
+//update Users
 
 router.put("/update/:email", async (req, res) => {
   try {
-    let UserEmail = req.params.email;
-    let updateEmail = req.body;
-
-    let getuserData = await userModel.findOneAndUpdate(
-      { email: UserEmail },
-      { $set: updateEmail },
+    let userEmail = req.params.email;
+    let updatedEmail = req.body;
+    let getuseData = await userModel.findOneAndUpdate(
+      { email: userEmail },
+      { $set: updatedEmail },
       { new: true }
     );
-    if (!getuserData) {
+    if (!getuseData) {
       return res.status(401).json({ msg: "Invalid Email" });
     }
-    res.status(200).json(getuserData);
+    res.status(200).json(getuseData);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-//get specific user by email
+//get specific user
 
 router.get("/getuserbyemail/:email", async (req, res) => {
   try {
     let email = req.params.email;
-
-    let getUser = await userModel.findOne({ email: email }); //or we only write {email} if key and value is same
-
-    if (!getUser) {
-      res.status(401).json({ msg: "User not found" });
+    let user = await userModel.findOne({ email });
+    if (!user) {
+      res.status(401).json({ msg: "Invalid Email" });
     }
-    res.status(200).json(getUser);
+    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-//Delete specific User
+//delete specific user
 
 router.delete("/deleteUser/:email", async (req, res) => {
   try {
     let email = req.params.email;
-
-    let findEmail = await userModel.deleteOne({ email });
-    if (!findEmail) {
-      res.status(401).json({ msg: "Email not found" });
-    }
+    await userModel.deleteOne({ email });
     res.status(200).json({ msg: "User Deleted Sucessfully" });
   } catch (error) {
-    res.status(500).json({ msg: "Internel server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// Delete All Users
+//delete all Users
 
 router.delete("/deleteAll", async (req, res) => {
   try {
     await userModel.deleteMany({});
     res.status(200).json({ msg: "All Users Deleted Sucessfully" });
   } catch (error) {
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

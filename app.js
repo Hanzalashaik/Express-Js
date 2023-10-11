@@ -9,7 +9,7 @@ const PORT = config.get("PORT")
 //Build In Middleware
 app.use(express.json());
 
-//for our purpose
+//for our own purpose
 app.get("/",(req,res)=>{
     res.status(200).send("<h1>Hello Server is Running 🚀</h1>");
 })
