@@ -75,11 +75,41 @@ router.put("/update/:email", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
+
 });
 
+//update by Id
 
+router.put("/updatebyId/:id", async (req, res) => {
+  try {
+    let id = req.params.id;
+    let update = req.body;
+ 
+    const updatedUser = await userModel.findByIdAndUpdate(id, update, { new: true });
 
+    if (!updatedUser) {
+      res.status(401).json({ msg: "ID not Found!" });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
+//delete by id
+
+router.delete("/deletebyId/:id",async(req,res)=>{
+  try {
+    let {id}=req.params
+  await userModel.findByIdAndDelete(id);
+  if(!id){
+    res.status(401).json({ msg: "ID not Found!" });
+  }
+  res.status(200).json({msg:"User is deleted successfully"});
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
 
 //delete specific user by email
 
