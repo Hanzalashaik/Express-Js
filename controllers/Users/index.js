@@ -1,14 +1,28 @@
 import express from "express";
 import userModel from "../../models/users/Users.js";
+import { body, validationResult } from "express-validator";
 
 const router = express.Router();
 
+//middleware
+const validator = [
+  body("firstName").isLength({ min: 2 }).isLength({ max: 15 }).withMessage("FirstName should have mininum 2 character and maximam 15"),
+  body("lastName").isLength({ min: 2 }).isLength({ max: 15 }),
+  body("email").isEmail(),
+  body("password").isStrongPassword(),
+  
+];
+
 //post data
-router.post("/addUsers", async (req, res) => {
+router.post("/addUsers", validator, async (req, res) => {
   try {
-    let userData = req.body;
-    await userModel.create(userData);
-    res.status(200).json({ msg: "User added sucessfully" });
+    const result = validationResult(req);
+    if (result.isEmpty()) {
+      let userData = req.body;
+      await userModel.create(userData);
+      res.status(200).json({ msg: "User added sucessfully" });
+    }
+    res.status(401).json({ errors: result });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -42,20 +56,22 @@ router.get("/getuserbyemail/:email", async (req, res) => {
 
 //get by id
 
-router.get("/getuserbyId/:id",async(req,res)=>{
+router.get("/getuserbyId/:id", async (req, res) => {
   try {
-    let { id }=req.params;
-    let user=await userModel.findById(id);
-    if(!user){
-      res.status(401).json({msg:"Invalid Email"})
+    let id = req.params.id;
+    // console.log(id);
+
+    let user = await userModel.findById(id);
+    // console.log(user);
+
+    if (!user) {
+      res.status(401).json({ msg: "Invalid Email" });
     }
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
-})
-
-
+});
 
 //update Users by email
 
@@ -75,17 +91,20 @@ router.put("/update/:email", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
-
 });
 
 //update by Id
 
 router.put("/updatebyId/:id", async (req, res) => {
   try {
-    let id = req.params.id;
+    let { id } = req.params;
     let update = req.body;
- 
-    const updatedUser = await userModel.findByIdAndUpdate(id, update, { new: true });
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      id,
+      { $set: update },
+      { new: true }
+    );
 
     if (!updatedUser) {
       res.status(401).json({ msg: "ID not Found!" });
@@ -98,18 +117,18 @@ router.put("/updatebyId/:id", async (req, res) => {
 
 //delete by id
 
-router.delete("/deletebyId/:id",async(req,res)=>{
+router.delete("/deletebyId/:id", async (req, res) => {
   try {
-    let {id}=req.params
-  await userModel.findByIdAndDelete(id);
-  if(!id){
-    res.status(401).json({ msg: "ID not Found!" });
-  }
-  res.status(200).json({msg:"User is deleted successfully"});
+    let { id } = req.params;
+    await userModel.findByIdAndDelete(id);
+    if (!id) {
+      res.status(401).json({ msg: "ID not Found!" });
+    }
+    res.status(200).json({ msg: "User is deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
-})
+});
 
 //delete specific user by email
 
