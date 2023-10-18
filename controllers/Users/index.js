@@ -1,32 +1,27 @@
 import express from "express";
 import userModel from "../../models/users/Users.js";
-import { body, validationResult } from "express-validator";
+import {
+  usersRegisterValidation,
+  errorMiddleware
+} from "../../middleware/users/index.js";
 
 const router = express.Router();
 
-//middleware
-const validator = [
-  body("firstName").isLength({ min: 2 }).isLength({ max: 15 }).withMessage("FirstName should have mininum 2 character and maximam 15"),
-  body("lastName").isLength({ min: 2 }).isLength({ max: 15 }),
-  body("email").isEmail(),
-  body("password").isStrongPassword(),
-  
-];
-
 //post data
-router.post("/addUsers", validator, async (req, res) => {
-  try {
-    const result = validationResult(req);
-    if (result.isEmpty()) {
+router.post(
+  "/addUsers",
+  usersRegisterValidation(),
+  errorMiddleware,
+  async (req, res) => {
+    try {
       let userData = req.body;
       await userModel.create(userData);
       res.status(200).json({ msg: "User added sucessfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
     }
-    res.status(401).json({ errors: result });
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
   }
-});
+);
 
 //get all data
 
